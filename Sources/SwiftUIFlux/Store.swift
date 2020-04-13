@@ -24,16 +24,11 @@ final public class Store<StoreState: FluxState>: ObservableObject {
         
         var middleware = middleware
         middleware.append(asyncActionsMiddleware)
-        self.dispatchFunction = middleware
-            .reversed()
-            .reduce(
-                { [unowned self] action in
-                    self._dispatch(action: action) },
-                { dispatchFunction, middleware in
-                    let dispatch: (Action) -> Void = { [weak self] in self?.dispatch(action: $0) }
-                    let getState = { [weak self] in self?.state }
-                    return middleware(dispatch, getState)(dispatchFunction)
-            })
+        self.dispatchFunction = { [weak self] action in
+            let dispatch: (Action) -> Void = { [weak self] in self?.dispatchFunction($0) }
+            middleware.forEach { $0(action, self?.state, dispatch) }
+            self?._dispatch(action: action)
+        }
     }
 
     public func dispatch(action: Action) {

@@ -6,5 +6,4 @@
 //
 
 public typealias DispatchFunction = (Action) -> Void
-public typealias Middleware<State> = (@escaping DispatchFunction, @escaping () -> FluxState?)
-    -> (@escaping DispatchFunction) -> DispatchFunction
+public typealias Middleware<State> = (Action, @autoclosure () -> FluxState?, @escaping DispatchFunction) -> ()
